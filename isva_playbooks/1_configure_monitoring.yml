@@ -24,6 +24,13 @@
       import_role:
         name: ske/assign_management_role_user
 
+    - name: enable snmp monitoring
+      vars:
+        config_snmp_monitoring_community: "{{ snmp_monitoring_community | default(omit) }}"
+        config_snmp_monitoring_port: "{{ snmp_monitoring_port | default(omit) }}"
+      import_role:
+         name: ibm.isam.config_snmp_monitoring
+
 - hosts: federation
   collections:
     - ibm.isam
