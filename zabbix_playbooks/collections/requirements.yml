@@ -1,0 +1,9 @@
+# Install collections
+# This is the same thing that Ansible Tower would also do automatically ...
+# ansible-galaxy collection install -r collections/requirements.yml --force
+#
+# Install zabbix collection
+#
+---
+collections:
+  - community-zabbix-1.4.0

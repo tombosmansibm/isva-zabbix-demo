@@ -1,0 +1,27 @@
+---
+sec_master_id: 'sec_master'
+sec_master_pwd: "{{ vault_sec_master_pwd }}"
+
+policy_admin: "{{ sec_master_id }}"
+policy_admin_pwd: "{{ sec_master_pwd }}"
+
+ldap_root_pwd: "{{ vault_ldap_root_pwd }}"
+
+
+ansible_host_download_dir: '/tmp'
+
+# default value for username, vault_password
+# these are not available for the 'localhost'
+username: admin@local
+vault_password: admin
+lmi_port: 443
+
+# new syntax
+# To activate, ansible_connection needs to be set as play variable
+# if ansible_connection is not defined, the old ways are active
+# ansible_connection: ibm.isam.isam
+ansible_isam_username: "{{ username }}"
+ansible_isam_password: "{{ vault_password }}"
+ansible_isam_port: "{{ lmi_port|default('443') }}"
+
+

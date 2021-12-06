@@ -1,0 +1,26 @@
+---
+- hosts: "all"
+  collections:
+    - ibm.isam
+  gather_facts: no
+  vars:
+    ansible_connection: ibm.isam.isam
+  tasks:
+    - name: configure default route
+      tags:
+        - network
+      import_role:
+        name: ibm.isam.base.configure_static_routes
+
+    - name: configure interfaces
+      tags:
+        - network
+      import_role:
+        name: ibm.isam.base.configure_interfaces
+
+    - name: configure interfaces
+      tags:
+        - network
+      import_role:
+        name: ibm.isam.base.configure_dhcp
+

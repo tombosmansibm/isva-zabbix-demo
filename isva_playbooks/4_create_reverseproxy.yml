@@ -1,0 +1,29 @@
+---
+#
+# Create reverse proxy.
+#
+- hosts: webseal
+  collections:
+    - ibm.isam
+  gather_facts: no
+  vars:
+    ansible_connection: ibm.isam.isam
+  tasks:
+    - name: create reverse proxy instance
+      import_role:
+         name: ibm.isam.web.create_reverseproxy_instances
+
+    - name: configure reverse proxy instance
+      import_role:
+         name: ibm.isam.web.configure_reverseproxy_instances
+
+    - name: configure reverse proxy junctions
+      import_role:
+         name: ske/configure_reverseproxy_junctions
+
+    - meta: flush_handlers
+# WARNING: MUST USE include_role here instead of import_role, to avoid weird "item.id" errors earlier in the play.
+    - name: restart reverse proxies
+      include_role:
+         name: ibm.isam.web.restart_reverseproxy_instances
+

@@ -1,0 +1,6 @@
+# Provide the following values for this role to work
+#management_authorization_roles_mapping:
+#   - name: System monitoring
+#     user_name: username
+#     type: 'local'  #values: ldap , local
+#     action: set     # set or delete

@@ -1,0 +1,18 @@
+---
+#
+# Set snmp alerts.
+#
+- hosts: "all"
+  collections:
+    - ibm.isam
+  gather_facts: no
+  vars:
+    ansible_connection: ibm.isam.isam
+  tasks:
+    - name: "Set snmp monitoring"
+      vars:
+        config_snmp_monitoring_community: "{{ snmp_monitoring_community | default(omit) }}"
+        config_snmp_monitoring_port: "{{ snmp_monitoring_port | default(omit) }}"
+      import_role:
+         name: ibm.isam.config_snmp_monitoring
+

@@ -1,0 +1,13 @@
+---
+# this is the new syntax
+# do not use sync_up, it's too slow.  Fastest is the "zip" import
+instance1_managementroot_files:
+ - mgmt_action: upload
+   target: junction-root/favicon.ico
+   file: files/management_root/default/junction-root/favicon.ico
+   type: file
+ - mgmt_action: upload
+   target: junction-root/index.html
+   file: files/management_root/default/junction-root/index.html
+   j2_t: templates/management_root/default/junction-root/index.html
+   type: file

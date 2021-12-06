@@ -1,0 +1,7 @@
+# Install collection from the DML server
+# This is the same thing that Ansible Tower would also do automatically ...
+# ansible-galaxy collection install -r collections/requirements.yml --force
+---
+collections:
+  - ibm.isam
+  - community.general

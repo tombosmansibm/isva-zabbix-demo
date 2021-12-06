@@ -1,0 +1,16 @@
+---
+- name: Add a user to a management authorization role group
+  ibm.isam.isam:
+    log: "{{ log_level | default('INFO') }}"
+    force: "{{ force | default(False) }}"
+    action: ibmsecurity.isam.base.management_authorization.role_user.{{ mitem.action|default('set') }}
+    isamapi: "{{ mitem | ibm.isam.exclude('action') }}"
+  when:
+    - management_authorization_roles_mapping is defined
+    - mitem.name is defined
+    - mitem.user_name is defined
+  loop: "{{ management_authorization_roles_mapping }}"
+  loop_control:
+    loop_var: mitem
+    label: "Assigning {{ mitem.name|default('') }} to {{ mitem.user_name|default('') }}"
+  notify: Commit Changes

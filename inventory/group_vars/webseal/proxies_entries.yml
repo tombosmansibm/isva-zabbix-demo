@@ -1,0 +1,92 @@
+---
+instance1_configuration_entries:
+- stanza_id: "server"
+  method: set
+  entries:
+  - ["use-http-only-cookies", "yes"]
+  - ["allow-unsollicited-logins", "no"]
+  - ["worker-threads", "1000"]
+  - ["suppress-server-identity", "yes"]
+  - ["suppress-backend-server-identity", "yes"]
+- stanza_id: "junction"
+  method: set
+  entries:
+  - ["managed-cookies-list", "JSESS*,Ltpa*"]
+  - ["reset-cookies-list", "JSESS*,Ltpa*"]
+  - ["share-cookies", no]
+  - ["pass-http-only-cookie-attr", yes]
+- stanza_id: "header-names"
+  method: set
+  entries:
+  - ["server-name", null]
+- stanza_id: "acnt-mgt"
+  method: set
+  entries:
+  - ["allow-unauthenticated-logout", "yes"]
+  - ["logout-remove-cookie", "yes"]
+- stanza_id: "content-mime-types"
+  method: set
+  entries:
+  - ["woff", "font/woff"]
+  - ["woff2", "font/woff2"]
+- stanza_id: "script-filtering"
+  method: set
+  entries:
+  - ["script-filter", "yes"]
+- stanza_id: "filter-content-types"
+  method: set
+  entries:
+  - ["type", "text/html"] #defaults
+  - ["type", "text/vnd.wap.wml"] #defaults
+  - ["type", "applications/atom+xml"]
+- stanza_id: "ssl"
+  method: set
+  entries:
+  - ["disable-tls-v1", "yes"]
+  - ["disable-tls-v11", "yes"]
+  - ["disable-tls-v12", "no"]
+  - ["disable-tls-v13", "yes"]
+  - ["ssl-max-entries", 1024000]
+- stanza_id: "ssl-qop-mgmt-default"
+  method: set
+  entries:
+  - ["default", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"]
+  - ["default", "TLS_RSA_WITH_AES_256_GCM_SHA384"]
+  - ["default", "TLS_RSA_WITH_AES_256_CBC_SHA256"]
+  - ["default", "TLS_RSA_WITH_AES_256_CBC_SHA"]
+  - ["default", "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256"]
+  - ["default", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"]
+  - ["default", "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384"]
+  - ["default", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"]
+- stanza_id: "session"
+  method: set
+  entries:
+  - ["create-unauth-sessions", "yes"]
+  - ["ssl-id-sessions", "no"]
+  - ["max-entries", 8192]
+  - ["unauth-max-entries", 4096]
+  - ["timeout", 21600]  
+  - ["inactive-timeout", 1800]
+  - ["unauth-inactive-timeout", 300]  
+- stanza_id: "logging"
+  method: set
+  entries:
+  - ["server-log-cfg", "file path=msg__webseald-instance1.log,hi_water=1,flush_interval=1,max_rollover_Files=5,rollover_size=-1"]
+  - ["max-size", -1]
+- stanza_id: "ba"
+  method: set
+  entries:
+  - ["ba-auth", "none"]
+- stanza_id: "forms"
+  method: set
+  entries:
+  - ["forms-auth", "https"]
+- stanza_id: "ltpa"
+  method: set
+  entries:
+  - ["ltpa-auth", "none"]
+- stanza_id: "eai"
+  method: set
+  entries:
+  - ["retain-eai-session", "yes"]
+  - ["eai-auth", "none"]

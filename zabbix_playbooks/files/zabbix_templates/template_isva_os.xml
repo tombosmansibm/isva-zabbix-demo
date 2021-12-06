@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2021-10-13T16:12:21Z</date>
+    <groups>
+        <group>
+            <name>ISVA</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>ISVA OS Linux snmp</template>
+            <name>ISVA OS Linux snmp</name>
+            <description>based on Template OS Linux</description>
+            <templates>
+                <template>
+                    <name>Linux CPU SNMP</name>
+                </template>
+                <template>
+                    <name>Linux memory SNMP</name>
+                </template>
+            </templates>
+            <groups>
+                <group>
+                    <name>ISVA</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Appliance</name>
+                </application>
+                <application>
+                    <name>General</name>
+                </application>
+                <application>
+                    <name>Status</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>ICMP ping</name>
+                    <type>SIMPLE</type>
+                    <key>icmpping</key>
+                    <history>1w</history>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>Service state</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{max(#3)}=0</expression>
+                            <name>Unavailable by ICMP ping</name>
+                            <priority>HIGH</priority>
+                            <description>Last three attempts returned timeout.  Please check device connectivity.</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ICMP loss</name>
+                    <type>SIMPLE</type>
+                    <key>icmppingloss</key>
+                    <history>1w</history>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{min(5m)}&gt;{$ICMP_LOSS_WARN} and {min(5m)}&lt;100</expression>
+                            <name>High ICMP ping loss</name>
+                            <opdata>Loss: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>Unavailable by ICMP ping</name>
+                                    <expression>{ISVA OS Linux snmp:icmpping.max(#3)}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>ICMP response time</name>
+                    <type>SIMPLE</type>
+                    <key>icmppingsec</key>
+                    <history>1w</history>
+                    <value_type>FLOAT</value_type>
+                    <units>s</units>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <triggers>
+                        <trigger>
+                            <expression>{avg(5m)}&gt;{$ICMP_RESPONSE_TIME_WARN}</expression>
+                            <name>High ICMP ping response time</name>
+                            <opdata>Value: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>High ICMP ping loss</name>
+                                    <expression>{ISVA OS Linux snmp:icmppingloss.min(5m)}&gt;{$ICMP_LOSS_WARN} and {ISVA OS Linux snmp:icmppingloss.min(5m)}&lt;100</expression>
+                                </dependency>
+                                <dependency>
+                                    <name>Unavailable by ICMP ping</name>
+                                    <expression>{ISVA OS Linux snmp:icmpping.max(#3)}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>SNMP traps (fallback)</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap.fallback</key>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Item is used to collect all SNMP traps unmatched by other snmptrap items</description>
+                    <applications>
+                        <application>
+                            <name>General</name>
+                        </application>
+                    </applications>
+                    <logtimefmt>hh:mm:sszyyyy/MM/dd</logtimefmt>
+                </item>
+                <item>
+                    <name>ISVA SNMP ignore</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[.*GLG.*]</key>
+                    <delay>0</delay>
+                    <history>1d</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Event log information items</description>
+                    <applications>
+                        <application>
+                            <name>Appliance</name>
+                        </application>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <logtimefmt>hh:mm:sszyyyy/MM/dd</logtimefmt>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>SNMPv2-SMI::enterprises\.2499\.1\.4\.1\.1\.1\.5\.0 = "(.*)"
+\1</params>
+                            <error_handler>CUSTOM_ERROR</error_handler>
+                            <error_handler_params>PROCESSING ERROR</error_handler_params>
+                        </step>
+                    </preprocessing>
+                </item>
+                <item>
+                    <name>ISVA SNMP traps</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[.*WGA.*]</key>
+                    <delay>0</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>WGA items</description>
+                    <applications>
+                        <application>
+                            <name>Appliance</name>
+                        </application>
+                        <application>
+                            <name>General</name>
+                        </application>
+                    </applications>
+                    <logtimefmt>hh:mm:sszyyyy/MM/dd</logtimefmt>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <params>SNMPv2-SMI::enterprises\.2499\.1\.4\.1\.1\.1\.5\.0 = "(.*)"
+\1</params>
+                            <error_handler>CUSTOM_ERROR</error_handler>
+                            <error_handler_params>PROCESSING ERROR</error_handler_params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{str(WGAWA0043W,#1)}=1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(WGAWA0650I,#1)}=1</recovery_expression>
+                            <name>ISVA CPU error: {ITEM.VALUE}</name>
+                            <opdata>HIGH: {ITEM.LASTVALUE1}</opdata>
+                            <priority>HIGH</priority>
+                            <description>CPU usage exceeds error threshold</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(WGAWA0643W,#1)}=1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(WGAWA0650I,#1)}=1</recovery_expression>
+                            <name>ISVA CPU warning: {ITEM.VALUE}</name>
+                            <opdata>HIGH: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <description>CPU usage exceeds warning threshold</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(WGAWA0644W,#1)}=1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(WGAWA0649I,#1)}=1</recovery_expression>
+                            <name>ISVA Disk usage: {ITEM.VALUE}</name>
+                            <opdata>HIGH: {ITEM.LASTVALUE1}</opdata>
+                            <priority>HIGH</priority>
+                            <description>Disk usage exceeds the warning threshold</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(WGAWA0047W,#1)}=1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(WGAWA0648I,#1)}=1</recovery_expression>
+                            <name>ISVA Reverse Proxy: {ITEM.VALUE}</name>
+                            <opdata>HIGH: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <description>A reverse proxy is configured but not running</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                        <trigger>
+                            <expression>{str(WGAWA0640W,#1)}=1</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>{str(WGAWA0653I,#1)}=1</recovery_expression>
+                            <name>ISVA Changes: {ITEM.VALUE}</name>
+                            <opdata>HIGH: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <description>There are inactive changes yet to be deployed</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>System name</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>1.3.6.1.2.1.1.5.0</snmp_oid>
+                    <key>system.name</key>
+                    <delay>1h</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <description>MIB: SNMPv2-MIB&#13;
+An administratively-assigned name for this managed node.By convention, this is the node's fully-qualified domain name.  If the name is unknown, the value is the zero-length string.</description>
+                    <inventory_link>NAME</inventory_link>
+                    <applications>
+                        <application>
+                            <name>General</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>DISCARD_UNCHANGED_HEARTBEAT</type>
+                            <params>1h</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{diff()}=1 and {strlen()}&gt;0</expression>
+                            <name>System name has changed (new name: {ITEM.VALUE})</name>
+                            <priority>INFO</priority>
+                            <description>System name has changed. Ack to close.</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>Uptime</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>1.3.6.1.2.1.1.3.0</snmp_oid>
+                    <key>system.uptime[sysUpTime.0]</key>
+                    <delay>30s</delay>
+                    <history>2w</history>
+                    <trends>0d</trends>
+                    <units>uptime</units>
+                    <description>MIB: SNMPv2-MIB&#13;
+The time (in hundredths of a second) since the network management portion of the system was last re-initialized.</description>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>0.01</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;10m</expression>
+                            <name>{HOST.NAME} has been restarted (uptime &lt; 10m)</name>
+                            <priority>WARNING</priority>
+                            <description>Uptime is less than 10 minutes</description>
+                            <manual_close>YES</manual_close>
+                            <dependencies>
+                                <dependency>
+                                    <name>No SNMP data collection</name>
+                                    <expression>{ISVA OS Linux snmp:zabbix[host,snmp,available].max({$SNMP.TIMEOUT})}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <name>SNMP agent availability</name>
+                    <type>INTERNAL</type>
+                    <key>zabbix[host,snmp,available]</key>
+                    <history>7d</history>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <valuemap>
+                        <name>zabbix.host.available</name>
+                    </valuemap>
+                    <triggers>
+                        <trigger>
+                            <expression>{max({$SNMP.TIMEOUT})}=0</expression>
+                            <name>No SNMP data collection</name>
+                            <opdata>Current state: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <description>SNMP is not available for polling. Please check device connectivity and SNMP settings.</description>
+                            <dependencies>
+                                <dependency>
+                                    <name>Unavailable by ICMP ping</name>
+                                    <expression>{ISVA OS Linux snmp:icmpping.max(#3)}=0</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>Service state</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>Down</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>Up</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>zabbix.host.available</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>not available</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>available</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>unknown</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>

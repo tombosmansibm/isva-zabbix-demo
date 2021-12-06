@@ -1,0 +1,26 @@
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: load vars
+      include_vars:
+        dir: vars
+
+    - name: Dump Zabbix template as JSON
+      run_once: true
+      delegate_to: localhost
+      community.zabbix.zabbix_template_info:
+        server_url: "{{ zabbix_host }}"
+        login_user: "{{ zabbix_user }}"
+        login_password: "{{ zabbix_password }}"
+        template_name: ISVA WebSeal
+        format: json
+        omit_date: yes  #set this to yes, to export as xml
+      register: template_dump
+
+    - name: create file
+      run_once: true
+      delegate_to: localhost
+      copy:
+        content: "{{ template_dump.template_json }}"
+        dest: files/isva.json

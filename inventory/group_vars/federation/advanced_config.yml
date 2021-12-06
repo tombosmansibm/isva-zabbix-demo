@@ -1,0 +1,7 @@
+#enable runtime monitoring
+advanced_tuning_parameters:
+  - tuning_action: set
+    key: "runtime_profile.enable.monitor"
+    value: "true"
+    comment: enable runtime monitoring
+

@@ -1,0 +1,21 @@
+
+14:22:59 2021/10/14 ZBXTRAP 10.233.155.239
+PDU INFO:
+  notificationtype               TRAP
+  version                        1
+  receivedfrom                   UDP: [10.233.155.239]:53486->[10.233.184.7]:162
+  errorstatus                    0
+  messageid                      0
+  community                      public
+  transactionid                  31
+  errorindex                     0
+  requestid                      1819967435
+VARBINDS:
+  DISMAN-EVENT-MIB::sysUpTimeInstance type=67 value=Timeticks: (794315341) 91 days, 22:25:53.41
+  SNMPv2-MIB::snmpTrapOID.0      type=6  value=OID: SNMPv2-SMI::enterprises.2499.0.2
+  SNMPv2-SMI::enterprises.2499.1.4.1.1.1.1.0 type=4  value=STRING: "1634214179"
+  SNMPv2-SMI::enterprises.2499.1.4.1.1.1.2.0 type=4  value=STRING: "2021-10-14T14:22:59+0200"
+  SNMPv2-SMI::enterprises.2499.1.4.1.1.1.3.0 type=4  value=STRING: "WGAWA0648I"
+  SNMPv2-SMI::enterprises.2499.1.4.1.1.1.4.0 type=2  value=INTEGER: 397
+  SNMPv2-SMI::enterprises.2499.1.4.1.1.1.5.0 type=4  value=STRING: "WGAWA0648I The reverse proxy has recovered: ontisam01-prx03 "
+  SNMPv2-SMI::enterprises.2499.1.4.1.1.1.6.0 type=4  value=STRING: "name=system,priority=low"

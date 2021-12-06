@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2021-10-13T15:33:27Z</date>
+    <groups>
+        <group>
+            <name>ISVA</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>ISVA WebSeal</template>
+            <name>ISVA WebSeal</name>
+            <description>WebSeal monitoring template</description>
+            <groups>
+                <group>
+                    <name>ISVA</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>webseal</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>isva.instance</name>
+                    <type>HTTP_AGENT</type>
+                    <key>isva.instance</key>
+                    <history>5d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <authtype>BASIC</authtype>
+                    <username>{$LMI_USER}</username>
+                    <password>{$LMI_PASSWORD}</password>
+                    <description>Retrieve instance and json</description>
+                    <applications>
+                        <application>
+                            <name>webseal</name>
+                        </application>
+                    </applications>
+                    <url>{$LMI_URL}/wga/widgets/health.json</url>
+                    <headers>
+                        <header>
+                            <name>Accept</name>
+                            <value>application/json</value>
+                        </header>
+                    </headers>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Discover webseal instances</name>
+                    <type>HTTP_AGENT</type>
+                    <key>isva.webseal.instances.discovery</key>
+                    <delay>5m</delay>
+                    <description>Discover the instances running on the appliance</description>
+                    <authtype>BASIC</authtype>
+                    <username>{$LMI_USER}</username>
+                    <password>{$LMI_PASSWORD}</password>
+                    <url>{$LMI_URL}/wga/widgets/health.json</url>
+                    <follow_redirects>NO</follow_redirects>
+                    <headers>
+                        <header>
+                            <name>Accept</name>
+                            <value>application/json</value>
+                        </header>
+                    </headers>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#WSPRX}</name>
+                            <type>DEPENDENT</type>
+                            <key>isva.instances.[{#WSPRX}]</key>
+                            <delay>0</delay>
+                            <applications>
+                                <application>
+                                    <name>webseal</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>IBM ISVA Webseal Health</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.items[?(@.name=='{#WSPRX}')].health</params>
+                                </step>
+                                <step>
+                                    <type>REGEX</type>
+                                    <params>\[(.*)\]
+\1</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>isva.instance</key>
+                            </master_item>
+                        </item_prototype>
+                    </item_prototypes>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.items[*]</params>
+                        </step>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var data = JSON.parse(value);
+var result = [], prxdata;
+for( var item, i = 0; item = data[i++];){
+ var prxdata = item.name;
+ result.push({"{#WSPRX}": prxdata});
+}
+return JSON.stringify(result);</params>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Discover webseal junctions</name>
+                    <type>HTTP_AGENT</type>
+                    <key>isva.webseal.junctions.discovery</key>
+                    <delay>5m</delay>
+                    <description>Discover junctions running on the appliance</description>
+                    <authtype>BASIC</authtype>
+                    <username>{$LMI_USER}</username>
+                    <password>{$LMI_PASSWORD}</password>
+                    <url>{$LMI_URL}/wga/widgets/health.json</url>
+                    <follow_redirects>NO</follow_redirects>
+                    <headers>
+                        <header>
+                            <name>Accept</name>
+                            <value>application/json</value>
+                        </header>
+                    </headers>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Junction {#WSJCT}</name>
+                            <type>DEPENDENT</type>
+                            <key>isva.webseal.junctions[{#WSJCT}]</key>
+                            <delay>0</delay>
+                            <applications>
+                                <application>
+                                    <name>webseal</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>IBM ISVA Webseal Health</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <params>$.items[*].children[?(@.name=='{#WSJCT}')].health</params>
+                                </step>
+                                <step>
+                                    <type>REGEX</type>
+                                    <params>\[(.*)\]
+\1</params>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>isva.instance</key>
+                            </master_item>
+                        </item_prototype>
+                    </item_prototypes>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.items[*]</params>
+                        </step>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <params>var data = JSON.parse(value);
+var result = [];
+for( var item, i = 0; item = data[i++];){
+ for (var junction, j = 0;  junction = item.children[j++];) {
+        result.push({"{#WSJCT}": junction.name});
+}
+}
+return JSON.stringify(result);</params>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+
+            </discovery_rules>
+        </template>
+    </templates>
+    <value_maps>
+                <value_map>
+                    <name>IBM ISVA Webseal Health</name>
+                    <mappings>
+                        <mapping>
+                            <value>0</value>
+                            <newvalue>OK</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>1</value>
+                            <newvalue>NOT RUNNING</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>2</value>
+                            <newvalue>ERROR</newvalue>
+                        </mapping>
+                    </mappings>
+                </value_map>
+    </value_maps>
+</zabbix_export>

@@ -1,0 +1,143 @@
+---
+# the code does not contain "set" , so we'd first need to determine if it's "add" or "update"
+- name: Get System Alert to SNMP
+  ibm.isam.isam:
+    log: "{{ log_level | default('INFO') }}"
+    force: "{{ force | default(False) }}"
+    action: ibmsecurity.isam.base.system_alerts.snmp.get_all
+    isamapi:
+  when:
+    - system_alerts is defined
+    - _alertitem.objType|default('snmp') == 'snmp'
+  register: _currentAlerts
+
+- name: simplify return object of names
+  set_fact:
+    _checkAlerts: "{{ (_checkAlerts|default([])) + [{
+                                                     'name': item.name,
+                                                     'uuid': item.uuid,
+                                                     'trapCommunity': item.trapCommunity|default(''),
+                                                     'trapPort': item.trapPort|default(162)|string,
+                                                     'trapVersion': item.trapVersion|default(''),
+                                                     'trapAddress': item.trapAddress|default(''),
+                                                     'comment': item.comment|default('')
+                                                     }] }}"
+  loop: "{{ _currentAlerts.data.snmpObjects|default([]) }}"
+  loop_control:
+    label: "Process {{ item.name|default('skip') }}"
+
+- debug:
+    verbosity: 2
+    msg:
+      - "CURRENTLY CONFIGURED ALERTS"
+      - "{{ _checkAlerts|default('') }}"
+
+- name: Update systemalerts object
+  vars:
+    _jsonquery: "[?name=='{{ item.name }}']"
+    _jsonResult: "{{ (_checkAlerts|default(['']))|community.general.json_query(_jsonquery) }}"
+  set_fact:
+    filteredAlerts_update: "{{ (filteredAlerts_update|default([])) + [item|combine({'uuid': _jsonResult[0].uuid })] }}"
+  loop: "{{ system_alerts }}"
+  loop_control:
+     label: |
+         {{ item.name|default('-') }} : {{ _jsonResult[0].uuid|default('') }} ,
+         comment: {{ item.comment|default('') + ' - ' +  _jsonResult[0].comment|default('') }},
+         community: {{ item.trapCommunity|default('') + ' - ' +  _jsonResult[0].trapCommunity|default('')}},
+         address: {{ item.trapAddress|default('') + ' - ' +  _jsonResult[0].trapAddress|default('') }},
+         port: {{ item.trapPort|default('') + ' - ' +  _jsonResult[0].trapPort|default('') }}
+         trapVersion: {{ item.trapVersion|default('') + ' - ' +  _jsonResult[0].trapVersion|default('') }}
+  when:
+    - system_alerts is defined
+    - _checkAlerts is defined
+    - item is defined
+    - (item.action|default('add')) in ['add','set']
+    - _jsonResult[0] is defined
+#So we know the object exists already.  Now I need to know if the values are the same
+# if the values are the same, we don't process it
+    - >
+        _jsonResult[0].trapCommunity != (item.trapCommunity|default('')) or
+        _jsonResult[0].trapAddress != (item.trapAddress|default('')) or
+        _jsonResult[0].comment != (item.comment|default('')) or
+        _jsonResult[0].trapPort != ((item.trapPort|default('162'))|string) or
+        _jsonResult[0].trapVersion != item.trapVersion|default('')
+
+- name: New systemalerts object
+  vars:
+    _jsonquery: "[?name=='{{ item.name }}'].uuid"
+  set_fact:
+    filteredAlerts_new: "{{ (filteredAlerts_new|default([])) + [item] }}"
+  loop: "{{ system_alerts }}"
+  when:
+    - system_alerts is defined
+    - (_checkAlerts is not defined) or (_checkAlerts|community.general.json_query(_jsonquery)|default('')|length < 1)
+    - item.action|default('add') in ['add','set']
+
+- debug:
+    verbosity: 2
+    msg:
+      - "NEW"
+      - "{{ filteredAlerts_new|default('no new') }}"
+      - "UPDATE"
+      - "{{ filteredAlerts_update|default('no updates') }}"
+
+- name: Create New System Alert to SNMP
+  ibm.isam.isam:
+    log: "{{ log_level | default('INFO') }}"
+    force: "{{ force | default(False) }}"
+    action: ibmsecurity.isam.base.system_alerts.snmp.add
+    isamapi: "{{ _alertitem | ibm.isam.exclude('action') }}"
+  when:
+    - filteredAlerts_new is defined
+    - _alertitem.objType|default('snmp') == 'snmp'
+  register: alertObj
+  loop: "{{ filteredAlerts_new }}"
+  loop_control:
+    label: "{{ _alertitem.name|default('skip') }}"
+    loop_var: _alertitem
+  notify:
+    - Commit Changes and Restart
+
+- name: Update System Alert to SNMP
+  ibm.isam.isam:
+    log: "{{ log_level | default('INFO') }}"
+    force: "{{ force | default(False) }}"
+    action: ibmsecurity.isam.base.system_alerts.snmp.update
+    isamapi: "{{ _alertitem | ibm.isam.exclude('action') }}"
+  when:
+    - filteredAlerts_update is defined
+    - _alertitem.objType|default('snmp') == 'snmp'
+  register: alertObj2
+  loop: "{{ filteredAlerts_update }}"
+  loop_control:
+    label: "{{ _alertitem.name|default('skip') }}"
+    loop_var: _alertitem
+  notify: Commit Changes
+
+#- debug:
+#    msg: "{{ alertObj.results|default('') }}"
+
+- name: combine the return objects
+  set_fact:
+    alertObj: "{{ alertObj.results|default([]) + alertObj2.results|default([]) }}"
+    alertObjStatus: "{{ (alertObj.changed|bool or alertObj.changed|bool) }}"
+
+- name: Enable System Alerts for new items
+  ibm.isam.isam:
+    log: "{{ log_level | default('INFO') }}"
+    force: "{{ force | default(False) }}"
+    action: ibmsecurity.isam.base.system_alerts.alerts.enable
+    isamapi:
+      uuid: "{{ _alertitem['data']['uuid'] }}"
+      objType: "{{ _alertitem['data']['objType'] }}"
+  when:
+   - not ansible_check_mode
+   - alertObjStatus|bool
+   - _alertitem is defined
+   - _alertitem.changed|bool
+   - _alertitem.data.uuid is defined
+  loop: "{{ alertObj|default([]) }}"
+  loop_control:
+    label: "Enabling {{ _alertitem.data.name|default('') }}"
+    loop_var: _alertitem
+  notify: Commit Changes

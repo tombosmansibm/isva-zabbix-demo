@@ -1,0 +1,7 @@
+#appliance_name: localisam
+password: "{{vault_password}}"
+
+appliance_host_name: "localisam.local"
+username: admin@local
+lmi_port: 443
+

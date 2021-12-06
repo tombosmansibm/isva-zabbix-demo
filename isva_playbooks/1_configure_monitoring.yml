@@ -1,0 +1,42 @@
+---
+- hosts: "all"
+  collections:
+    - ibm.isam
+  gather_facts: no
+  vars:
+    ansible_connection: ibm.isam.isam
+  tasks:
+    - name: configure sysaccounts
+      tags:
+        - sysaccount
+      import_role:
+        name: ibm.isam.base.configure_sysaccounts
+
+    - name: enable management authorization
+      tags:
+        - management
+      import_role:
+        name: ske/set_management_authorization
+
+    - name: assign role
+      tags:
+        - management
+      import_role:
+        name: ske/assign_management_role_user
+
+- hosts: federation
+  collections:
+    - ibm.isam
+  gather_facts: no
+  vars:
+    ansible_connection: ibm.isam.isam
+  tasks:
+    - name: enable monitoring for federation
+      import_role:
+        name: ibm.isam.base.configure_advanced_tuning_parameters
+      when: advanced_tuning_parameters is defined
+
+    - name: set runtime listening interface
+      import_role:
+        name: ibm.isam.base.set_listening_interfaces
+      when: listening_interfaces is defined

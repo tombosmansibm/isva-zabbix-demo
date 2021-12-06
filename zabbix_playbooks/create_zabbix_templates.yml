@@ -1,0 +1,22 @@
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: load vars
+      include_vars:
+        dir: vars
+
+    - name: Import template from xml
+      run_once: true
+      delegate_to: localhost
+      community.zabbix.zabbix_template:
+        server_url: "{{ zabbix_host }}"
+        login_user: "{{ zabbix_user }}"
+        login_password: "{{ zabbix_password }}"
+        template_xml: "{{ lookup('file', item) }}"
+        state: present
+      loop:
+        - 'zabbix_templates/template_isva_federation.xml'
+        - 'zabbix_templates/template_isva_webseal.xml'
+        - 'zabbix_templates/template_isva_os.xml'
+

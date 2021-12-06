@@ -1,0 +1,8 @@
+---
+# ansible-vault encrypt_string -n monitoring_user_password <monitoring01_password>
+# or
+# ansible-vault encrypt vault.yml
+monitoring_user_password: paprika
+
+vault_zabbix_password: zabbix
+

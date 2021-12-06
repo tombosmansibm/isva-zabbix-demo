@@ -1,0 +1,42 @@
+---
+# primary lmi interface
+primary_lmi_interface:
+  address: "{{ inventory_hostname }}"
+  maskOrPrefix: "24"
+  allowManagement: true
+  enabled: true
+# runtime interface
+#  for proxy, there is no runtime interface
+runtime_interface:
+  address: "{{ inventory_hostname.split('.')[:-1]|join('.') }}.200"
+  maskOrPrefix: "24"
+  allowManagement: false
+  enabled: true
+#proxy interface
+proxy1_interface:
+    address: "{{ inventory_hostname.split('.')[:-1]|join('.') }}.201"
+    maskOrPrefix: "24"
+    allowManagement: False
+    enabled: true
+
+# network configuration
+interfaces:
+  - label: '1.1'
+    name: Primary
+    comment: 'host-only interface (ansible)'
+    dhcp:
+      - enabled: false
+    addresses:
+      - "{{ primary_lmi_interface }}"
+      - "{{ runtime_interface }}"
+      - "{{ proxy1_interface }}"
+
+static_routes:
+  - address: default
+    enabled: True
+    maskOrPrefix: ""
+    gateway: "{{ inventory_hostname.split('.')[:-1]|join('.') }}.1"
+    label: "1.1"
+    metric: "100"
+    comment: "Default gateway"
+    route_action: set

@@ -1,0 +1,52 @@
+#
+# SNMP
+#     community string is the same for everything and is synched with Alexander Wesseling
+snmp_monitoring_enabled: true
+snmp_version: "snmpv1v2c"
+snmp_monitoring_community: "ISVA"
+snmp_monitoring_port: 161
+
+# snmp traps
+snmp_monitoring_trap_port: 162
+snmp_monitoring_trap_name: "SNMP ALERT SKE"
+
+# ****Defaults***** for the zabbix connections.
+# Local Zabbix
+# In this case, take the ip address of the gateway for your workstation
+#snmp_zabbixproxy: 192.168.151.1
+snmp_zabbixproxy: "{{ inventory_hostname.split('.')[:-1]|join('.') }}.1"
+
+#snmp traps
+system_alerts:
+  - objType: snmp
+    action: add
+    name: "{{ snmp_monitoring_trap_name }}"
+    trapAddress: "{{ snmp_zabbixproxy|default(omit) }}"
+    trapCommunity: "{{ snmp_monitoring_community }}"
+    trapVersion: "V2C"   #V1, V2C, V3
+    trapPort: "{{ snmp_monitoring_trap_port|default('162') }}"
+    comment: "SKE monitoring"
+
+#logcfg variables to use - specifically used in proxy_audit.yml atm.
+logcfg_flush_interval: 5 #interval in seconds that events are flushed
+logcfg_hi_water: 1 #high water sends immediately if x events are waiting.  Set to 1 to immediately write
+logcfg_rollover_size: -1 #negative value means daily, and on restart
+logcfg_max_rollover_files: 2
+
+# Monitoring user (wga/widgets and system monitoring)
+monitoring_user_lmi: monitoring01
+monitoring_user_lmi_full: "{{ monitoring_user_lmi }}@local"
+
+#Add monitoring user to local ldap
+sysaccounts:
+  - sysaccount_action: create
+    id: "{{ monitoring_user_lmi }}"
+    password: "{{ monitoring_user_password }}" #password should be secured with ansible-vault
+    groups: []
+
+# Create role or assign roles
+management_authorization_roles_mapping:
+   - name: System monitoring
+     user_name: "{{ monitoring_user_lmi }}"
+     type: local
+     action: set

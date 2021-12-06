@@ -1,0 +1,13 @@
+---
+#
+# Runtime listening interfaces ip is used in
+#   - runtime-configuration (for federation)
+#   - proxy configurations that connect to a runtime
+#
+listening_interfaces:
+  - address: "{{ runtime_interface.address|default('127.0.0.1') }}"
+    port: 443
+    secure: True
+  - address: "{{ runtime_interface.address|default('127.0.0.1') }}"
+    port: 80
+    secure: False

@@ -1,0 +1,38 @@
+---
+instances:
+  - "{{ instance1 }}"
+
+instance1:
+  proxy: "instance1"
+  inst_name: "instance1"
+  configuration:
+    host: "{{ inventory_hostname }}"
+    admin_id: "{{ policy_admin }}"
+    admin_pwd: "{{ policy_admin_pwd }}"
+    domain: "Default"
+    #http_yn: "on"
+    #http_port: 80
+    https_yn: "on"
+    #https_port: 444
+    listening_port: 7244
+    ssl_yn: "no"
+    key_file: "pdsrv.kdb"
+    cert_label: "WebSEAL-Test-Only"
+    #ssl_port: null
+    ip_address: "{{ proxy1_interface.address|default('0.0.0.0') }}"
+  entries: "{{ instance1_configuration_entries }}"
+  junctions:
+   - junction_point: "/zabbix"
+     junction_type: 'tcp'
+     description: "Test application point of contact"
+     servers:
+       - server_hostname: "{{ snmp_zabbixproxy }}"
+         server_port: 80
+   - junction_point: "/mga"
+     junction_type: "ssl"
+     stateful_junction: "yes"
+     servers:
+       - server_hostname: "{{ runtime_interface.address }}"
+         server_port: 80
+  management_root: "{{ instance1_managementroot_files|default([]) }}"
+

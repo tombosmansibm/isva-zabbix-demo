@@ -1,0 +1,62 @@
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: load vars
+      include_vars:
+        dir: vars
+#requires super admin role:
+    - name: Create host groups
+      delegate_to: localhost
+      community.zabbix.zabbix_group:
+        server_url: "{{ zabbix_host }}"
+        login_user: "{{ zabbix_user }}"
+        login_password: "{{ zabbix_password }}"
+        state: present
+        host_groups:
+          - ISVA
+
+    - name: Federation/aac define templates and macros to link
+      set_fact:
+        zabbix_link_templates: "{{ zabbix_link_templates + zabbix_templates_fed|default([]) }}"
+        zabbix_macros: "{{ zabbix_macro_fed|default([]) }}"
+      when:
+        - ("'federation' in group_names") or ("'aac' in group_names")
+
+    - name: Webseal define templates to link
+      set_fact:
+        zabbix_link_templates: "{{ zabbix_link_templates + zabbix_templates_webseal|default([]) }}"
+        zabbix_macros: "{{ zabbix_macros|default([]) + zabbix_macro_webseal|default([]) }}"
+      when:
+        - "'webseal' in group_names"
+
+    - name: Create a new host or update an existing host's info
+      delegate_to: localhost
+      community.zabbix.zabbix_host:
+        #module: community.zabbix.zabbix_host
+        force: yes
+        server_url: "{{ zabbix_host }}"
+        login_user: "{{ zabbix_user }}"
+        login_password: "{{ zabbix_password }}"
+        host_name: "{{ inventory_hostname }}"
+        visible_name: "{{ inventory_hostname }}"
+        description: "ISVA {{ inventory_hostname }} - ansible"
+        link_templates: "{{ zabbix_link_templates|default(omit) }}"
+        host_groups:
+          - ISVA
+        status: enabled
+        state: present
+        inventory_mode: automatic
+        inventory_zabbix:
+          notes: "ANSIBLE GENERATED CONFIGURATION"
+          os: "ISVA"
+        interfaces:
+          - type: 2
+            main: 1
+            useip: 0
+            ip: "{{ primary_lmi_interface.address|default('') }}"
+            dns: "{{ inventory_hostname }}"
+            port: "161"
+            details:
+              community: "{{ snmp_monitoring_community|default('public') }}"
+        macros: "{{ zabbix_macros|default([]) }}"

@@ -1,0 +1,12 @@
+---
+#Passwords for the host.
+# This file should obviously be encrypted.
+#vault
+vault_sec_master_pwd: 'Passw0rd'
+vault_easuser_password: 'password'
+
+# shared passwords should go here
+# eg. certificate passwords, passwords to backend, ldap, ...
+
+#Vault containing monitoring user
+monitoring_user_password: paprika

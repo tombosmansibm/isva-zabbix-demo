@@ -1,0 +1,41 @@
+---
+# Shared vars
+zabbix_host: http://localhost
+zabbix_user: Admin
+zabbix_password: "{{ vault_zabbix_password }}"
+
+# Templates
+zabbix_templates_fed:
+  - ISVA Federation
+zabbix_templates_webseal:
+  - ISVA WebSeal
+zabbix_link_templates:
+  - ISVA OS Linux snmp
+
+zabbix_macro_fed:
+  - macro: "{$RUNTIME_URL}"
+    type: text
+    value: "{{ runtime_interface.address|default('127.0.0.1') }}"
+    description: ISVA runtime address to use in templates
+  - macro: "{$RUNTIME_PROTOCOL}"
+    type: text
+    value: "{{ runtime_protocol|default('http://') }}"
+    description: "ISVA runtime protocol (http:// or https://) to use in templates. Defaults to http://"
+  - macro: "{$RUNTIME_PORT}"
+    type: text
+    value: "{{ runtime_port|default('80') }}"
+    description: ISVA runtime port.  Defaults to 80.
+zabbix_macro_webseal:
+  #this needs to be modified to the monitoring user!
+  - macro: "{$LMI_USER}"
+    type: text
+    value: "{{ monitoring_user_lmi_full|default('monitoring01@local') }}"
+    description: ISVA lmi user for http calls
+  - macro: "{$LMI_PASSWORD}"
+    type: secret
+    value: "{{ monitoring_user_password }}"
+    description: ISVA lmi password
+  - macro: "{$LMI_URL}"
+    type: text
+    value: "https://{{ inventory_hostname }}:{{ lmi_port|default('443') }}"
+    description: ISVA lmi url

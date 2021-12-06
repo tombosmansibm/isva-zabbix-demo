@@ -1,0 +1,36 @@
+---
+
+#Provide a valid SNMP collector server name
+add_system_alerts_snmp_trapAddress: null
+add_system_alerts_snmp_trapPort: 162
+add_system_alerts_snmp_trapCommunity: null
+add_system_alerts_snmp_trapVersion: V1
+add_system_alerts_snmp_trapNotificationType: null
+add_system_alerts_snmp_authEnabled: True
+add_system_alerts_snmp_authType: SHA
+add_system_alerts_snmp_authPassPhrase: null
+add_system_alerts_snmp_privEnabled: True
+add_system_alerts_snmp_privType: AES
+add_system_alerts_snmp_privPassPhrase: null
+add_system_alerts_snmp_informSnmpEngineID: null
+add_system_alerts_snmp_informTimeout: null
+
+#system_alerts object
+#system_alerts:
+#     - objType: snmp     #defaults to snmp
+#       action: add       #add, delete
+#       name: "SNMP Alert"
+#       trapAddress: "snmp.example.com"
+#       trapCommunity: "public"
+#       trapNotificationType: null #only for V3
+#       trapVersion: "V2C"   #V1, V2C, V3
+#       trapPort: 162
+#       authEnabled: false
+#       authType: SHA
+#       authPassPhrase: null
+#       privEnabled: True
+#       privType: AES
+#       privPassPhrase: null
+#       informSnmpEngineID: null
+#       informTimeout: null
+#       comment: null

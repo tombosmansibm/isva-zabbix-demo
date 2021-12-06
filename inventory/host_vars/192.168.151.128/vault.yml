@@ -1,0 +1,9 @@
+---
+#Passwords for the host.
+# This file should obviously be encrypted.
+old_password: Passw0rd
+vault_password: Passw0rd
+
+
+
+
