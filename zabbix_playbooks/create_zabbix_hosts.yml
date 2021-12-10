@@ -16,7 +16,7 @@
         host_groups:
           - ISVA
 
-    - name: Federation/aac define templates and macros to link
+    - name: Federation/aac runtime define templates and macros to link
       set_fact:
         zabbix_link_templates: "{{ zabbix_link_templates + zabbix_templates_fed|default([]) }}"
         zabbix_macros: "{{ zabbix_macro_fed|default([]) }}"
@@ -53,7 +53,7 @@
         interfaces:
           - type: 2
             main: 1
-            useip: 0
+            useip: 1
             ip: "{{ primary_lmi_interface.address|default('') }}"
             dns: "{{ inventory_hostname }}"
             port: "161"
