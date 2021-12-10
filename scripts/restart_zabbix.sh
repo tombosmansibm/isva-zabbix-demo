@@ -40,10 +40,11 @@ sudo podman run --name zabbix-server-mysql -t \
      --rm=True \
      -d docker.io/zabbix/zabbix-server-mysql:5.4-alpine-latest
 echo "starting zabbix web interface..."
+#     -e ZBX_SERVER_HOST="zabbix-server-mysql" \
 sudo podman run --name zabbix-web-nginx-mysql -t \
-      -e ZBX_SERVER_HOST="zabbix-server-mysql" \
+      -e ZBX_SERVER_HOST="127.0.0.1" \
       -e ZBX_SERVER_NAME="ISVA Zabbix" \
-      -e DB_SERVER_HOST="zabbix-mysql-server" \
+      -e DB_SERVER_HOST="127.0.0.1" \
       -e MYSQL_DATABASE="zabbix" \
       -e MYSQL_USER="zabbix" \
       -e MYSQL_PASSWORD="zabbix_pwd" \
